@@ -15,11 +15,12 @@ app.post('/api/chat', async(c) => {
     });
     // Stores by default
     const response = await client.responses.create({
-      input: [{role: "user", content: payload.userMessage}],
+      input: payload.userMessage,
       model: "gpt-4.1",
-      previous_response_id: payload.previousResponseId
+      previous_response_id: payload.previousResponseId,
     });
     return c.json(response);
 });
+
 
 export default app;
