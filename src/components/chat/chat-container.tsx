@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { ChatMessage, Message } from "./message";
 import { ChatInput } from "./chat-input";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,6 +11,9 @@ export function ChatContainer() {
   const [previousResponseId, setPreviousResponseId] = useState<string | undefined>(
     () => localStorage.getItem("previousResponseId") || undefined
   );
+  
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   const handleSubmit = async (content: string) => {
     // Add user message to the chat
@@ -40,15 +43,27 @@ export function ChatContainer() {
       }
 
       const data = await response.json();
+
+      // Add MCP Call responses to chat
+      const mcpCallMessages: Message[] = data.output
+        .filter((entry: {type: string}) => entry.type === "mcp_call")
+        .map((entry: {type:string, id:string}) => (
+          {
+            id: entry.id,
+            role: "tool",
+            content: JSON.stringify(entry, null, 2)
+          }
+        ));
       
       // Add AI response to chat
       const assistantMessage: Message = {
-        id: data.output?.[0]?.id || String(Date.now()),
+        // NOTE: Using the response id here
+        id: data.id || String(Date.now()),
         role: "assistant",
-        content: data.output?.[0]?.content?.[0]?.text || "Sorry, I couldn't generate a response.",
+        content: data.output_text || "Sorry, I couldn't generate a response.",
       };
       
-      setMessages((prev) => [...prev, assistantMessage]);
+      setMessages((prev) => [...prev, ...mcpCallMessages, assistantMessage]);
       setPreviousResponseId(data.id || data.response_id);
       localStorage.setItem("previousResponseId", data.id || data.response_id);
     } catch (error) {
@@ -72,13 +87,24 @@ export function ChatContainer() {
     setPreviousResponseId(undefined);
     localStorage.removeItem("previousResponseId");
   };
+  
+  const scrollToBottom = () => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  // Auto-scroll when messages change
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   return (
-    <Card className="w-full max-w-5xl h-[600px] flex flex-col shadow-lg border-neutral-200">
-      <CardHeader className="flex flex-row items-center justify-between border-b pb-3">
+    <Card className="w-full max-w-7xl h-[80vh] flex flex-col shadow-lg border-neutral-200 mx-auto">
+      <CardHeader className="flex flex-row items-center justify-between border-b pb-2 px-4 py-2 h-14">
         <div className="flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-          <CardTitle className="text-xl">OpenAI Chat</CardTitle>
+          <CardTitle className="text-xl">OpenAI Chat + MCP Tools</CardTitle>
         </div>
         <Button 
           variant="ghost" 
@@ -90,22 +116,27 @@ export function ChatContainer() {
           Clear Chat
         </Button>
       </CardHeader>
-      <CardContent className="flex-1 overflow-hidden pt-4">
-        <ScrollArea className="h-[450px] pr-4">
+      <CardContent className="flex-1 overflow-hidden p-0">
+        <ScrollArea 
+          className="h-[calc(80vh-84px)] px-4 py-3" 
+          type="always" 
+          ref={scrollAreaRef}
+        >
           {messages.length === 0 ? (
             <div className="h-full flex items-center justify-center text-center p-8 text-muted-foreground">
               <p className="text-sm">Send a message to start the conversation</p>
             </div>
           ) : (
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-3 pb-4 pt-2">
               {messages.map((message) => (
                 <ChatMessage key={message.id} message={message} />
               ))}
+              <div ref={messagesEndRef} />
             </div>
           )}
         </ScrollArea>
       </CardContent>
-      <CardFooter className="border-t pt-3">
+      <CardFooter className="border-t p-4 h-[70px]">
         <ChatInput onSubmit={handleSubmit} isLoading={isLoading} />
       </CardFooter>
     </Card>

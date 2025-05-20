@@ -3,3 +3,15 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Cloudflare orange color */
+:root {
+  --cloudflare-orange: #F48120;
+  --ring-color: var(--cloudflare-orange);
+}
+
+/* Custom focus styles for inputs and textareas */
+.focus-visible\:ring-ring:focus-visible {
+  --tw-ring-color: var(--cloudflare-orange);
+  --tw-ring-opacity: 0.7;
+}
+

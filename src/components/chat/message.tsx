@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
-import { useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
+import { ChevronDown, ChevronUp, Wrench } from "lucide-react";
 
 declare global {
   interface Window {
@@ -9,7 +10,7 @@ declare global {
   }
 }
 
-export type MessageRole = "assistant" | "user";
+export type MessageRole = "assistant" | "user" | "tool";
 
 export interface Message {
   id: string;
@@ -23,6 +24,7 @@ interface MessageProps {
 
 export function ChatMessage({ message }: MessageProps) {
   const contentRef = useRef<HTMLDivElement>(null);
+  const [isCollapsed, setIsCollapsed] = useState(message.role === "tool");
 
   useEffect(() => {
     if (contentRef.current && message.role === "assistant" && window.marked) {
@@ -38,6 +40,35 @@ export function ChatMessage({ message }: MessageProps) {
       }
     }
   }, [message.content, message.role]);
+
+  if (message.role === "tool") {
+    return (
+      <div className="flex w-full items-start gap-2 py-2 justify-start">
+        <div className="bg-amber-50 border border-amber-200 dark:bg-amber-950/30 dark:border-amber-900/50 max-w-[85%] rounded-lg px-4 py-3 shadow-sm">
+          <button 
+            onClick={() => setIsCollapsed(prev => !prev)}
+            className="flex items-center gap-2 w-full text-left text-amber-800 dark:text-amber-300 font-medium"
+          >
+            <Wrench className="h-4 w-4" />
+            <span className="text-left">🛠️ Tool Message</span>
+            {isCollapsed ? (
+              <ChevronDown className="h-4 w-4 ml-auto" />
+            ) : (
+              <ChevronUp className="h-4 w-4 ml-auto" />
+            )}
+          </button>
+          
+          {!isCollapsed && (
+            <div className="mt-2 pt-2 border-t border-amber-200 dark:border-amber-800">
+              <pre className="whitespace-pre-wrap break-words text-xs overflow-auto max-h-[300px] text-left">
+                {message.content}
+              </pre>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div

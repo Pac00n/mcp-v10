@@ -35,7 +35,7 @@ export function ChatInput({ onSubmit, isLoading }: ChatInputProps) {
           onKeyDown={handleKeyDown}
           placeholder={isLoading ? "Waiting for response..." : "Type your message..."}
           disabled={isLoading}
-          className="min-h-[60px] py-3 pr-12 resize-none"
+          className="min-h-[40px] max-h-[100px] py-2 pr-12 resize-none"
         />
         {isLoading && (
           <div className="absolute right-3 top-3 text-muted-foreground">
@@ -46,7 +46,7 @@ export function ChatInput({ onSubmit, isLoading }: ChatInputProps) {
       <Button 
         type="submit" 
         disabled={isLoading || !input.trim()} 
-        className="h-[60px] px-4"
+        className="h-[40px] px-4"
         size="icon"
       >
         {isLoading ? (

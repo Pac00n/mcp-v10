@@ -16,9 +16,21 @@ app.post('/api/chat', async(c) => {
     // Stores by default
     const response = await client.responses.create({
       input: payload.userMessage,
-      model: "gpt-4.1",
+      model: "gpt-4o",
       previous_response_id: payload.previousResponseId,
+      tools: [
+        {
+          "type": "mcp",
+          "server_label": "whoa",
+          "server_url": c.env.REMOTE_WHOA_SERVER_URL,
+          "headers": {
+            "X-Whoa-Username": c.env.LOGGED_IN_USER
+          },
+          "require_approval": "never"
+        }
+      ],
     });
+    console.log(JSON.stringify(response, null, 2));
     return c.json(response);
 });
 
