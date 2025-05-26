@@ -5,7 +5,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 
-export function ChatContainer() {
+export function N8nChatContainer() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   
@@ -24,13 +24,13 @@ export function ChatContainer() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("https://primary-production-f283.up.railway.app/webhook/chat", {
+      const response = await fetch("https://primary-production-f283.up.railway.app/webhook/6677dc0f-3f6c-43c8-ae40-c94ae1f0fbed", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          message: content,
+          chatInput: content,
         }),
       });
 
@@ -40,23 +40,25 @@ export function ChatContainer() {
 
       const data = await response.json();
 
-      let responseText = "Sorry, I couldn't get a response.";
-      if (typeof data === 'string') {
-        responseText = data;
-      } else if (data && typeof data === 'object') {
+      let responseText = "Sorry, I couldn't retrieve a valid response."; // Mensaje de error por defecto
+
+      if (Array.isArray(data) && data.length > 0 && data[0] && typeof data[0].output === 'string') {
+        responseText = data[0].output;
+      } else if (data && typeof data === 'object') { // Fallback si no es la estructura esperada array
         if (typeof data.reply === 'string') {
           responseText = data.reply;
         } else if (typeof data.text === 'string') {
           responseText = data.text;
+        } else if (typeof data.output === 'string') { // Fallback por si 'output' está en el objeto raíz
+          responseText = data.output;
         } else {
-          // Como último recurso, si es un objeto pero no tiene 'reply' o 'text'
-          // podrías querer stringify todo el objeto o manejarlo de otra forma.
-          // Por ahora, lo stringificamos si es la única opción, o mantenemos el error.
-          // Considera si quieres mostrar el JSON completo o un mensaje más amigable.
-          responseText = JSON.stringify(data, null, 2); 
+          // Si es un objeto pero no tiene campos conocidos, stringify para depuración
+          responseText = JSON.stringify(data, null, 2);
         }
+      } else if (typeof data === 'string') { // Si la respuesta es directamente un string
+        responseText = data;
       }
-      // Si data no es string ni objeto, responseText mantiene el mensaje de error inicial.
+      // Si 'data' no es ninguna de estas, responseText mantiene el mensaje de error.
       
       // Add AI response to chat
       const assistantMessage: Message = {
