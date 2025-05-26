@@ -11,11 +11,8 @@
   ],
   "routes": [
     {
-      "src": "^/(.*)",
+      "src": "/(.*)",
       "dest": "/index.html"
     }
-  ],
-  "rewrites": [
-    { "source": "/:path*", "destination": "/index.html" }
   ]
 }

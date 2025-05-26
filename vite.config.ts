@@ -1,30 +1,26 @@
-import path from "path";
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-import tailwindcss from "@tailwindcss/vite";
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import path from 'path';
 
-import { cloudflare } from "@cloudflare/vite-plugin";
-
-// https://vite.dev/config/
+// https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [tailwindcss(), react(), cloudflare()],
+  plugins: [react()],
   base: '/',
   build: {
     outDir: 'dist',
     emptyOutDir: true,
   },
-  preview: {
-    port: 3000,
-    strictPort: true,
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
   },
   server: {
     port: 3000,
-    strictPort: true,
-    host: true,
+    open: true,
   },
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-    },
+  preview: {
+    port: 3000,
+    open: true,
   },
 });
