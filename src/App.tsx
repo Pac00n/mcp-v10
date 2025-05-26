@@ -1,17 +1,16 @@
 import "./App.css";
-import { ChatContainer } from "./components/chat/chat-container";
 import { N8nChatContainer } from "./components/chat/n8n-chat-container";
 
 function App() {
   return (
-    <div className="flex flex-col items-center min-h-svh p-2 gap-4"> {/* Añadido gap-4 para espaciado */}
-      {/* Chat original (puedes descomentar el título si quieres) */}
-      {/* <h2 className="text-xl font-semibold mt-4">Chat Original</h2> */}
-      <ChatContainer />
-
-      {/* Nuevo chat para N8N (puedes descomentar el título si quieres) */}
-      {/* <h2 className="text-xl font-semibold mt-4">Chat con N8N</h2> */}
-      <N8nChatContainer />
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4">
+      <div className="w-full max-w-4xl">
+        <header className="mb-6 text-center">
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">Chat con N8N</h1>
+          <p className="text-gray-600">Envía mensajes que se procesarán a través de n8n</p>
+        </header>
+        <N8nChatContainer />
+      </div>
     </div>
   );
 }

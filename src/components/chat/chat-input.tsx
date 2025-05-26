@@ -6,9 +6,10 @@ import { LoaderCircle, SendIcon } from "lucide-react";
 interface ChatInputProps {
   onSubmit: (message: string) => void;
   isLoading: boolean;
+  placeholder?: string;
 }
 
-export function ChatInput({ onSubmit, isLoading }: ChatInputProps) {
+export function ChatInput({ onSubmit, isLoading, placeholder }: ChatInputProps) {
   const [input, setInput] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -33,7 +34,7 @@ export function ChatInput({ onSubmit, isLoading }: ChatInputProps) {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder={isLoading ? "Waiting for response..." : "Type your message..."}
+          placeholder={isLoading ? "Esperando respuesta..." : (placeholder || "Escribe un mensaje...")}
           disabled={isLoading}
           className="min-h-[40px] max-h-[100px] py-2 pr-12 resize-none"
         />
