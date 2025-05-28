@@ -20,10 +20,21 @@ export function WritingPanel({ open, onClose, content: initialMarkdownContent }:
 
   const editor = useEditor({
     extensions: [
-      StarterKit.configure(),
+      StarterKit.configure({
+        // Configurar para que siempre haya un párrafo inicial
+        paragraph: {
+          keepMarks: true,
+          keepAttributes: true,
+        },
+      }),
     ],
-    content: currentTipTapContent,
+    content: currentTipTapContent || '<p></p>', // Asegurar un párrafo inicial
     editable: true,
+    editorProps: {
+      attributes: {
+        class: 'prose dark:prose-invert prose-sm max-w-none focus:outline-none',
+      },
+    },
     onUpdate: ({ editor }) => {
       // Actualizar el estado si se quiere sincronizar con el padre o guardar
       // setCurrentTipTapContent(editor.getHTML()); // Podría causar bucles si no se maneja con cuidado
@@ -33,8 +44,6 @@ export function WritingPanel({ open, onClose, content: initialMarkdownContent }:
       if (!empty) {
         const text = editor.state.doc.textBetween(from, to, ' ');
         setSelectedText(text); // Guardar el texto plano seleccionado
-        // Guardar el rango de Tiptap (posiciones, no objeto Range DOM directamente)
-        // selectedRangeRef.current ya no es necesario si usamos from/to de la selección de Tiptap
         setPopoverVisible(true); 
       } else {
         setSelectedText('');
@@ -42,6 +51,14 @@ export function WritingPanel({ open, onClose, content: initialMarkdownContent }:
       }
     },
   });
+
+  // Asegurar que el editor tenga un párrafo inicial cuando se monte
+  useEffect(() => {
+    if (editor && !editor.getText().trim()) {
+      editor.commands.setContent('<p></p>');
+      editor.commands.focus('end');
+    }
+  }, [editor]);
 
   // Sincronizar initialMarkdownContent (Markdown) con el contenido del editor TipTap (HTML)
   useEffect(() => {
@@ -153,37 +170,57 @@ export function WritingPanel({ open, onClose, content: initialMarkdownContent }:
         <BubbleMenu
           editor={editor}
           tippyOptions={{ duration: 100, placement: 'bottom-start' }}
-          className="bg-gray-700 shadow-xl p-2 rounded-md border border-gray-600 flex items-center space-x-2 z-[70]"
+          className="bg-gray-700 shadow-xl rounded-md border border-gray-600 z-[70]"
           shouldShow={({ editor: currentEditor, state }) => {
             if (!currentEditor || !state) return false;
             return !state.selection.empty;
           }}
         >
-          <input
-            type="text"
-            placeholder="Ej: 'hazlo más formal'"
-            value={editPrompt}
-            onChange={e => setEditPrompt(e.target.value)}
-            onKeyDown={e => {
-              if (e.key === 'Enter') sendEditRequest();
-              if (e.key === 'Escape') {
-                setPopoverVisible(false); // Sigue siendo útil para cerrar con Escape
-                setEditPrompt('');
-              }
-            }}
-            className="flex-grow p-1.5 rounded-md bg-gray-800 text-white border border-gray-600 focus:ring-1 focus:ring-blue-500 outline-none text-sm"
-          />
-          {isEditingLoading ? (
-            <Loader2 className="h-5 w-5 animate-spin text-blue-400" />
-          ) : (
-            <button 
-              onClick={sendEditRequest} 
-              className="p-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm"
-              disabled={!editPrompt.trim()}
-            >
-              Aplicar
-            </button>
-          )}
+          <div className="p-2 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-400">Texto seleccionado:</span>
+              <button
+                onClick={() => {
+                  setPopoverVisible(false);
+                  setEditPrompt('');
+                }}
+                className="text-gray-400 hover:text-white transition-colors text-sm"
+                aria-label="Cerrar menú"
+              >
+                ×
+              </button>
+            </div>
+            <div className="bg-gray-700/50 rounded-md p-2 text-gray-300 text-sm overflow-hidden">
+              <p className="whitespace-pre-wrap break-words">{selectedText}</p>
+            </div>
+            <div className="flex items-center space-x-2">
+              <input
+                type="text"
+                placeholder="Ej: 'hazlo más formal'"
+                value={editPrompt}
+                onChange={e => setEditPrompt(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter') sendEditRequest();
+                  if (e.key === 'Escape') {
+                    setPopoverVisible(false);
+                    setEditPrompt('');
+                  }
+                }}
+                className="flex-grow p-1.5 rounded-md bg-gray-800 text-white border border-gray-600 focus:ring-1 focus:ring-blue-500 outline-none text-sm"
+              />
+              {isEditingLoading ? (
+                <Loader2 className="h-5 w-5 animate-spin text-blue-400" />
+              ) : (
+                <button 
+                  onClick={sendEditRequest} 
+                  className="p-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm"
+                  disabled={!editPrompt.trim()}
+                >
+                  Aplicar
+                </button>
+              )}
+            </div>
+          </div>
         </BubbleMenu>
       )}
 
