@@ -104,7 +104,7 @@ export function WritingPanel({ open, onClose, content: initialMarkdownContent }:
     };
 
     try {
-      const res = await fetch("https://primary-production-f283.up.railway.app/webhook/6677dc0f-3f6c-43c8-ae40-c94ae1f0fbed", {
+      const res = await fetch("http://localhost:7000/mcp", {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),

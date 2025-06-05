@@ -2,7 +2,7 @@
 
 Este proyecto implementa una interfaz de chat que se conecta a dos tipos de asistentes:
 1.  Un **Asistente de Señalización** potenciado por OpenAI Assistants API.
-2.  Un **Asistente con Herramientas MCP** que se conecta a un webhook de N8N.
+2.  Un **Asistente con Herramientas MCP** que se conecta a un servidor FastMCP.
 
 La aplicación permite seleccionar el asistente deseado desde una página y luego interactuar con él a través de una interfaz de chat unificada.
 
@@ -27,7 +27,7 @@ La aplicación permite seleccionar el asistente deseado desde una página y lueg
     *   `OPENAI_API_KEY`: Tu clave API de OpenAI.
     *   `OPENAI_ASSISTANT_ID_SENALIZACION`: El ID de tu Asistente de OpenAI para señalización (por defecto se usa `asst_MXuUc0TcV7aPYkLGbN5glitq`, puedes cambiarlo si tienes uno diferente).
 
-    **Nota sobre el Asistente N8N:** La URL del webhook para el "Asistente con Herramientas MCP" (N8N) está actualmente codificada en `src/components/chat/n8n-chat-container.tsx`. Puedes modificarla allí directamente si es necesario, o considerar moverla a una variable de entorno en `.env` (ver `.env.example`).
+    **Nota sobre el Asistente MCP:** La URL del servidor MCP está codificada en `src/components/chat/McpChatContainer.tsx`. Modifícala allí si es necesario o usa una variable de entorno.
 
 4.  **Instala las dependencias:**
     ```bash
@@ -48,7 +48,7 @@ Esto iniciará la aplicación, generalmente en `http://localhost:5173`. La aplic
 *   `src/`: Código fuente de la aplicación.
     *   `components/chat/`: Componentes específicos de los chats.
         *   `OpenAiAssistantChat.tsx`: Interfaz y lógica para el chat con OpenAI Assistants.
-        *   `n8n-chat-container.tsx`: Interfaz y lógica para el chat con N8N.
+        *   `McpChatContainer.tsx`: Interfaz y lógica para el chat con el servidor MCP.
     *   `lib/assistants.ts`: Definiciones de los asistentes disponibles.
     *   `pages/`: Componentes que actúan como páginas.
         *   `AssistantsPage.tsx`: Página de selección de asistentes (página de inicio actual).

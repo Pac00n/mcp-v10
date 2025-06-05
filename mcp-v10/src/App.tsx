@@ -1,11 +1,11 @@
 import "./App.css";
 import { useState } from "react";
-import { N8nChatContainer } from "./components/chat/n8n-chat-container";
+import { McpChatContainer } from "./components/chat/McpChatContainer";
 import OpenAiAssistantChat from "./components/chat/OpenAiAssistantChat";
 import AssistantsPage from "./pages/AssistantsPage";
 import HomePage from "./pages/HomePage"; // Importar la nueva página de inicio
 
-type PageView = "assistants" | "openai-chat" | "n8n-chat"; // "homepage" eliminada temporalmente
+type PageView = "assistants" | "openai-chat" | "mcp-chat"; // "homepage" eliminada temporalmente
 
 function App() {
   const [currentPage, setCurrentPage] = useState<PageView>("assistants"); // Iniciar en "assistants"
@@ -23,8 +23,8 @@ function App() {
     if (assistantActionId === "senalizacion-v3") {
       setSelectedAssistantId(assistantActionId);
       setCurrentPage("openai-chat");
-    } else if (assistantActionId === "n8n-chat") {
-      setCurrentPage("n8n-chat");
+    } else if (assistantActionId === "mcp-chat") {
+      setCurrentPage("mcp-chat");
     } else {
       // Futuros asistentes OpenAI
       setSelectedAssistantId(assistantActionId);
@@ -51,10 +51,10 @@ function App() {
         content = <HomePage navigateToAssistants={() => navigateTo("assistants")} />; // Fallback si no hay ID
       }
       break;
-    case "n8n-chat":
+    case "mcp-chat":
       content = (
-        <div className="w-full h-full flex-grow"> {/* Contenedor para asegurar que N8nChatContainer pueda expandirse */}
-          <N8nChatContainer
+        <div className="w-full h-full flex-grow"> {/* Contenedor para asegurar que McpChatContainer pueda expandirse */}
+          <McpChatContainer
             onGoBack={() => navigateTo("assistants")}
             chatTitle="Asistente con Herramientas MCP"
           />
