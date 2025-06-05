@@ -12,15 +12,15 @@ type Message = {
   content: string;
   timestamp: Date;
   isStreaming?: boolean; // Para simular efecto si se desea
-  // imageBase64?: string | null; // Omitido por ahora para N8N, se puede añadir si es necesario
+  // imageBase64?: string | null; // Omitido por ahora para MCP, se puede añadir si es necesario
 };
 
-interface N8nChatContainerProps {
+interface McpChatContainerProps {
   onGoBack?: () => void;
   chatTitle?: string;
 }
 
-export function N8nChatContainer({ onGoBack, chatTitle = "Asistente N8N" }: N8nChatContainerProps) {
+export function McpChatContainer({ onGoBack, chatTitle = "Asistente MCP" }: McpChatContainerProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -36,7 +36,7 @@ export function N8nChatContainer({ onGoBack, chatTitle = "Asistente N8N" }: N8nC
 
   const showWelcomeMessage = useCallback(() => {
     setMessages([{
-      id: "welcome-n8n",
+      id: "welcome-mcp",
       role: "assistant",
       content: `¡Hola! Soy ${chatTitle}. ¿En qué puedo ayudarte hoy?`,
       timestamp: new Date(),
@@ -79,7 +79,7 @@ export function N8nChatContainer({ onGoBack, chatTitle = "Asistente N8N" }: N8nC
     setIsLoading(true);
 
     // Placeholder para el mensaje del asistente mientras carga
-    const assistantMessagePlaceholderId = `assistant-n8n-${Date.now()}`;
+    const assistantMessagePlaceholderId = `assistant-mcp-${Date.now()}`;
     setMessages(prev => [
       ...prev,
       {
@@ -92,7 +92,7 @@ export function N8nChatContainer({ onGoBack, chatTitle = "Asistente N8N" }: N8nC
     ]);
 
     try {
-      const response = await fetch("https://primary-production-f283.up.railway.app/webhook/6677dc0f-3f6c-43c8-ae40-c94ae1f0fbed", {
+      const response = await fetch("http://localhost:7000/mcp", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ chatInput: currentInput }),
@@ -100,7 +100,7 @@ export function N8nChatContainer({ onGoBack, chatTitle = "Asistente N8N" }: N8nC
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({ message: "Error en la respuesta del servidor" }));
-        throw new Error(errorData.message || "Fallo al enviar el mensaje a N8N");
+        throw new Error(errorData.message || "Fallo al enviar el mensaje a MCP");
       }
 
       const data = await response.json();
@@ -118,7 +118,7 @@ export function N8nChatContainer({ onGoBack, chatTitle = "Asistente N8N" }: N8nC
       }
 
       // Lógica para el panel de redacción
-      console.log("[MCP Editor Debug N8N] Raw response text from N8N:", responseText);
+      console.log("[MCP Editor Debug MCP] Raw response text from MCP:", responseText);
       
       // Limpiar el responseText si está envuelto en ```json ... ```
       let cleanedResponseText = responseText.trim();
@@ -129,38 +129,38 @@ export function N8nChatContainer({ onGoBack, chatTitle = "Asistente N8N" }: N8nC
         cleanedResponseText = cleanedResponseText.substring(0, cleanedResponseText.length - 3);
       }
       cleanedResponseText = cleanedResponseText.trim(); // Quitar espacios extra
-      console.log("[MCP Editor Debug N8N] Cleaned response text for JSON parsing:", cleanedResponseText);
+      console.log("[MCP Editor Debug MCP] Cleaned response text for JSON parsing:", cleanedResponseText);
 
       try {
         const parsedContent = JSON.parse(cleanedResponseText);
-        console.log("[MCP Editor Debug N8N] Parsed content:", parsedContent);
+        console.log("[MCP Editor Debug MCP] Parsed content:", parsedContent);
         if (parsedContent.action === "open_editor") {
-          console.log("[MCP Editor Debug N8N] Action 'open_editor' detected. Opening panel.");
+          console.log("[MCP Editor Debug MCP] Action 'open_editor' detected. Opening panel.");
           setEditorContent(parsedContent.content || '');
           setEditorOpen(true);
           // Eliminar el mensaje placeholder ya que el panel se abre
           setMessages(prev => prev.filter(msg => msg.id !== assistantMessagePlaceholderId));
         } else {
-          console.log("[MCP Editor Debug N8N] Action not 'open_editor'. Treating as normal message. Action was:", parsedContent.action);
+          console.log("[MCP Editor Debug MCP] Action not 'open_editor'. Treating as normal message. Action was:", parsedContent.action);
           setMessages(prev => prev.map(msg =>
             msg.id === assistantMessagePlaceholderId
-              ? { ...msg, content: responseText, isStreaming: false, id: `assistant-n8n-resp-${Date.now()}` }
+              ? { ...msg, content: responseText, isStreaming: false, id: `assistant-mcp-resp-${Date.now()}` }
               : msg
           ));
         }
       } catch (parseError) {
-        console.log("[MCP Editor Debug N8N] Not a JSON action or parse error. Treating as normal message. Parse error:", parseError);
+        console.log("[MCP Editor Debug MCP] Not a JSON action or parse error. Treating as normal message. Parse error:", parseError);
         // No es JSON o no es la acción esperada, tratar como mensaje normal
         setMessages(prev => prev.map(msg =>
           msg.id === assistantMessagePlaceholderId
-            ? { ...msg, content: responseText, isStreaming: false, id: `assistant-n8n-resp-${Date.now()}` }
+            ? { ...msg, content: responseText, isStreaming: false, id: `assistant-mcp-resp-${Date.now()}` }
             : msg
         ));
       }
 
     } catch (err: any) {
-      console.error("Error enviando mensaje a N8N:", err);
-      setError(err.message || "Error al procesar tu solicitud con N8N.");
+      console.error("Error enviando mensaje a MCP:", err);
+      setError(err.message || "Error al procesar tu solicitud con MCP.");
       setMessages(prev => prev.map(msg =>
         msg.id === assistantMessagePlaceholderId
           ? { ...msg, content: "Error al obtener respuesta.", isStreaming: false, role: "system" }
@@ -173,7 +173,7 @@ export function N8nChatContainer({ onGoBack, chatTitle = "Asistente N8N" }: N8nC
     }
   };
   
-  const AccentGradient = "bg-gradient-to-r from-blue-500 via-teal-500 to-green-600"; // Paleta diferente para N8N
+  const AccentGradient = "bg-gradient-to-r from-blue-500 via-teal-500 to-green-600"; // Paleta diferente para MCP
   const SubtleGradient = "bg-gradient-to-r from-blue-400 to-green-500";
 
   return (
@@ -255,7 +255,7 @@ export function N8nChatContainer({ onGoBack, chatTitle = "Asistente N8N" }: N8nC
                 ${message.role === "user"
                   ? "bg-gradient-to-br from-orange-500 to-red-600 text-white rounded-br-md" // Mantenemos estilo de usuario
                   : message.role === "assistant"
-                  ? "bg-gradient-to-br from-blue-600 to-teal-700 text-white rounded-bl-md" // Estilo de asistente N8N
+                  ? "bg-gradient-to-br from-blue-600 to-teal-700 text-white rounded-bl-md" // Estilo de asistente MCP
                   : "bg-gray-700 text-gray-300 rounded-md" }`}
               >
                 <div className="px-3 py-2 bg-gray-900/60 rounded-[10px] backdrop-blur-sm">
@@ -296,7 +296,7 @@ export function N8nChatContainer({ onGoBack, chatTitle = "Asistente N8N" }: N8nC
 
       <footer className="mt-auto z-20 p-3 md:p-4"> {/* Eliminado fondo, borde y backdrop-blur */}
         <form onSubmit={handleSubmit} className="flex items-end space-x-2 md:space-x-3">
-          {/* Funcionalidad de adjuntar imagen omitida para N8N por simplicidad, se puede añadir si es necesario */}
+          {/* Funcionalidad de adjuntar imagen omitida para MCP por simplicidad, se puede añadir si es necesario */}
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -326,7 +326,7 @@ export function N8nChatContainer({ onGoBack, chatTitle = "Asistente N8N" }: N8nC
           </motion.button>
         </form>
         <p className="text-xs text-gray-500 text-center mt-2">
-          {isLoading ? "Asistente N8N está procesando..." : `Hablando con ${chatTitle}`}
+          {isLoading ? "Asistente MCP está procesando..." : `Hablando con ${chatTitle}`}
         </p>
       </footer>
     </div>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-const MCP_TOOLS_URL = 'https://primary-production-f283.up.railway.app/webhook/mcp/tools';
+const MCP_TOOLS_URL = 'http://localhost:7000/tools';
 
 export function useMcpToolsCount() {
   const [count, setCount] = useState(0);

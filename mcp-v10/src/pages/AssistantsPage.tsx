@@ -23,12 +23,12 @@ const assistantCardsData: AssistantCardInfo[] = [
     actionId: "senalizacion-v3", // ID del asistente a cargar
   },
   {
-    id: "n8n-chat-card", // ID único para la tarjeta/key
+    id: "mcp-chat-card", // ID único para la tarjeta/key
     title: "Asistente con Herramientas MCP",
-    description: "Chat conectado a N8N con herramientas personalizadas.",
-    icon: <Hammer className="w-8 h-8 text-rose-400" />, // Icono para el chat de N8N
+    description: "Chat conectado al servidor MCP con herramientas personalizadas.",
+    icon: <Hammer className="w-8 h-8 text-rose-400" />, // Icono para el chat MCP
     color: "from-rose-500 to-pink-600",
-    actionId: "n8n-chat", // ID para identificar este chat
+    actionId: "mcp-chat", // ID para identificar este chat
   }
 ];
 
